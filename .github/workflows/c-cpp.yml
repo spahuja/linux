@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Linux Kernel Build
 
 on:
   workflow_dispatch:
@@ -10,23 +10,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Autotools
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config
+          sudo apt-get install -y \
+            build-essential \
+            bc \
+            bison \
+            flex \
+            libssl-dev \
+            libelf-dev \
+            dwarves
 
-      - name: Generate configure script
-        run: autoreconf -i
+      - name: Show CPU info
+        run: nproc
 
-      - name: Configure
-        run: ./configure
+      - name: Configure kernel (default config)
+        run: make defconfig
 
-      - name: Make
-        run: make
+      - name: Build kernel
+        run: make -j$(nproc)
 
-      - name: Make check
-        run: make check
-
-      - name: Make distcheck
-        run: make distcheck
-
+      - name: Show built artifacts
+        run: ls -lh arch/x86/boot/
