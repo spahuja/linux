@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, ir-cold]
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +20,13 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          if command -v sudo &>/dev/null && sudo -n true 2>/dev/null; then
+            SUDO=sudo
+          else
+            SUDO=""
+          fi
+          $SUDO apt-get update
+          $SUDO apt-get install -y \
             build-essential \
             bc \
             bison \
