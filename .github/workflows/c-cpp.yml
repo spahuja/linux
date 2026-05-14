@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, ir-cold]
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
