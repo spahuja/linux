@@ -7,26 +7,15 @@ jobs:
   build:
     runs-on: [self-hosted, ir-cold]
     timeout-minutes: 30
+    container:
+      image: ubuntu:24.04
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Show runner info
-        run: |
-          echo "Runner: $RUNNER_NAME ($RUNNER_ARCH)"
-          echo "CPU cores: $(nproc)"
-          free -h | head -2
-          df -h /
-
       - name: Install build dependencies
         run: |
-          if command -v sudo &>/dev/null && sudo -n true 2>/dev/null; then
-            SUDO=sudo
-          else
-            SUDO=""
-          fi
-          $SUDO apt-get update
-          $SUDO apt-get install -y \
+          apt-get update
+          apt-get install -y \
+            git \
             build-essential \
             bc \
             bison \
@@ -34,6 +23,14 @@ jobs:
             libssl-dev \
             libelf-dev \
             dwarves
+
+      - uses: actions/checkout@v4
+
+      - name: Show runner info
+        run: |
+          echo "CPU cores: $(nproc)"
+          free -h | head -2
+          df -h /
 
       - name: Configure kernel (defconfig)
         run: make defconfig
