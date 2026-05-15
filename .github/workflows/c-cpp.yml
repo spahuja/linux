@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ir-cold]
+    runs-on: [self-hosted, ir-build]
     timeout-minutes: 30
     container:
       image: ubuntu:24.04
