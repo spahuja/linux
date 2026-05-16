@@ -7,30 +7,22 @@ jobs:
   build:
     runs-on: [self-hosted, ir-build]
     timeout-minutes: 30
-    container:
-      image: ubuntu:24.04
 
     steps:
-      - name: Install build dependencies
-        run: |
-          apt-get update
-          apt-get install -y \
-            git \
-            build-essential \
-            bc \
-            bison \
-            flex \
-            libssl-dev \
-            libelf-dev \
-            dwarves
-
       - uses: actions/checkout@v4
 
       - name: Show runner info
         run: |
+          echo "Runner: $RUNNER_NAME ($RUNNER_ARCH)"
           echo "CPU cores: $(nproc)"
           free -h | head -2
           df -h /
+
+      - name: Verify build tools
+        run: |
+          gcc --version | head -1
+          make --version | head -1
+          docker version --format '{{.Server.APIVersion}}' || echo "docker not ready"
 
       - name: Configure kernel (defconfig)
         run: make defconfig
