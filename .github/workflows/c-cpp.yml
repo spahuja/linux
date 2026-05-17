@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, ir-build]
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -18,17 +18,30 @@ jobs:
           free -h | head -2
           df -h /
 
-      - name: Verify build tools
+      - name: Install ccache
+        run: sudo apt-get install -y -qq ccache
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: kernel-ccache-defconfig-${{ hashFiles('Makefile') }}
+          restore-keys: |
+            kernel-ccache-defconfig-
+
+      - name: Configure ccache
         run: |
-          gcc --version | head -1
-          make --version | head -1
-          docker version --format '{{.Server.APIVersion}}' || echo "docker not ready"
+          ccache --max-size=2G
+          ccache --zero-stats
 
       - name: Configure kernel (defconfig)
         run: make defconfig
 
-      - name: Build kernel
-        run: make -j$(nproc)
+      - name: Build kernel with ccache
+        run: make -j$(nproc) CC="ccache gcc"
+
+      - name: Show ccache stats
+        run: ccache --show-stats
 
       - name: Show built artifacts
         run: ls -lh arch/x86/boot/
